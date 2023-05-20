@@ -4,8 +4,6 @@ const dotenv = require('dotenv');
 const db = require('./model');
 const cors = require('cors');
 const authRoute = require('./routes/auth');
-const kelasRoute = require('./routes/kelas');
-const propsRoute = require('./routes/props');
 const { profile, update, destroy, token } = require('./routes/controlUser');
 const verifyToken = require('./routes/verifyToken');
 const refreshToken = require('./routes/refreshToken');
@@ -34,8 +32,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors());
 app.use('/api/user', authRoute);
-app.use('/api/kelas', kelasRoute);
-app.use('/api/props', propsRoute);
 app.get('/api/user/profile', verifyToken, profile);
 app.get('/api/user/refreshToken', refreshToken);
 

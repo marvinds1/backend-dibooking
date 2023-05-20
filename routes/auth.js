@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const User = require('../model/User');
+const User = require('../model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { registerValidation, loginValidation } = require('../validation');
@@ -50,9 +50,7 @@ router.post('/login', async (req, res) => {
 
 router.delete('/logout', async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
-    // if (!refreshToken) return res.sendStatus(401);
     console.log(refreshToken);
-    // const user = await User.findOne({ refreshToken: refreshToken });
     await User.updateOne({ email: req.body.email }, { refreshToken: null })
     res.clearCookie('refreshToken');
     return res.sendStatus(200);
