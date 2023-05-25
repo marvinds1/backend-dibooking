@@ -2,13 +2,12 @@ const User = require('../model/user');
 
 const profile = async (req, res) => {
     try {
-
         const user = await User.findOne({ refreshToken: req.cookies.refreshToken });
         res.json({
             name: user.name,
             email: user.email,
-            address: user.address,
-            refreshToken: user.refreshToken
+            contact: user.contact,
+            address: user.address
         });
     }
     catch (err) {

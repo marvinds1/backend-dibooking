@@ -9,6 +9,10 @@ const registerValidation = data => {
             .min(6)
             .required()
             .email(),
+        contact: Joi.string()
+            .min(5)
+            .max(255)
+            .required(),
         address: Joi.string()
             .min(5)
             .max(512)

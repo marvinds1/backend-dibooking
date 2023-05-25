@@ -1,3 +1,3 @@
 module.exports = {
-    url: "mongodb://localhost:27017/rumahharmonis_backend"
+    url: "mongodb://localhost:27017/dibooking"
 };
