@@ -2,20 +2,19 @@ const Joi = require('joi');
 
 const registerValidation = data => {
     const schema = Joi.object({
-        name: Joi.string()
+        nama: Joi.string()
             .min(3)
             .required(),
         email: Joi.string()
             .min(6)
             .required()
             .email(),
-        contact: Joi.string()
+        nomor_ponsel: Joi.string()
             .min(5)
             .max(255)
             .required(),
-        address: Joi.string()
-            .min(5)
-            .max(512)
+        daftar_sebagai: Joi.string()
+            .valid('Penyewa', 'Pemilik Lapangan')
             .required(),
         password: Joi.string()
             .min(6)
@@ -32,6 +31,9 @@ const loginValidation = data => {
             .email(),
         password: Joi.string()
             .min(6)
+            .required(),
+        status: Joi.string()
+            .valid('Penyewa', 'Pemilik Lapangan')
             .required()
     });
     return schema.validate(data);
