@@ -13,15 +13,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// router.get('/:id', async (req, res) => {
-//   const pesanan = await Pesanan.findOne({ idPesanan: req.params.id });
-//   try {
-//     res.json(pesanan);
-//   } catch (e) {
-//     res.json({ message: e });
-//   }
-// });
-
 router.post('/add', async (req, res) => {
   let Id = Math.floor(Math.random() * 1000000000);
   let alreadyExists = await Pesanan.findOne({ id: Id });
@@ -39,7 +30,7 @@ router.post('/add', async (req, res) => {
   });
   try {
     await newPesanan.save();
-    res.json({ message: 'Pesanan added' });
+    res.json(newPesanan);
   } catch (e) {
     res.json({ message: e });
   }
@@ -95,7 +86,6 @@ router.get('/pesanans', async (req, res) => {
   const user = await User.findOne({ refreshToken });
   const pesanan = await Pesanan.find({ idUser: user.id });
   const data = [];
-  pesanan.filter((item) => item.status !== 'Selesai' || item.status !== 'Dibatalkan');
   for (let i = 0; i < pesanan.length; i += 1) {
     const lapangan1 = await Lapangan.findOne({ idField: pesanan[i].idField });
     const manager = await User.findOne({ id: lapangan1.idManager });
@@ -113,6 +103,16 @@ router.get('/pesanans', async (req, res) => {
   }
   try {
     res.json(data);
+  } catch (e) {
+    res.json({ message: e });
+  }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+  const pesanan = await Pesanan.findOne({ idPesanan: req.params.id });
+  try {
+    await pesanan.remove();
+    res.json({ message: 'Pesanan deleted' });
   } catch (e) {
     res.json({ message: e });
   }

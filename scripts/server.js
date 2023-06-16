@@ -10,8 +10,6 @@ const authRoute = require('./routes/auth');
 const profile = require('./routes/controlUser');
 const lapangan = require('./routes/controlLapangan');
 const pesanan = require('./routes/controlPesanan');
-//   { profile, update, destroy, token, }
-// const verifyToken = require('./routes/verifyToken');
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
