@@ -3,47 +3,6 @@
 const User = require('../model/user');
 const router = require('./auth');
 
-// const profile = async (req, res) => {
-//   try {
-//     const user = await User.findOne({ refreshToken: req.cookies.refreshToken });
-//     res.json({
-//       name: user.name,
-//       email: user.email,
-//       contact: user.contact,
-//       address: user.address,
-//     });
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
-
-// const update = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.user.name);
-//     user.name = req.body.name;
-//     user.email = req.body.email;
-//     user.address = req.body.address;
-//     await user.save();
-//     res.json({
-//       name: user.name,
-//       email: user.email,
-//       address: user.address,
-//     });
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
-
-// const destroy = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.user.name);
-//     await user.remove();
-//     res.json({ message: 'User deleted' });
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
-
 router.get('/profile', async (req, res) => {
   const refreshToken = req.headers.authorization;
   if (!refreshToken) return res.sendStatus(401);

@@ -8,6 +8,8 @@ const cors = require('cors');
 const db = require('./model');
 const authRoute = require('./routes/auth');
 const profile = require('./routes/controlUser');
+const lapangan = require('./routes/controlLapangan');
+const pesanan = require('./routes/controlPesanan');
 //   { profile, update, destroy, token, }
 // const verifyToken = require('./routes/verifyToken');
 const cookieParser = require('cookie-parser');
@@ -36,6 +38,8 @@ app.use(express.json());
 app.use(cors());
 app.use('/api/user', authRoute);
 app.use('/api/detail', profile);
+app.use('/api/lapangan', lapangan);
+app.use('/api/pemesanan', pesanan);
 
 exports.app = app;
 
