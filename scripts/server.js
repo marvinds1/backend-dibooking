@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable import/order */
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const dotenv = require('dotenv');
@@ -27,15 +26,10 @@ db.mongoose.connect(db.url, dbConfig)
     console.log('Cannot connect to the database!', err); process.exit();
   });
 
-app.use('/api', createProxyMiddleware({
-  target: 'https://backend-dibooking.vercel.app',
-  changeOrigin: true,
-}));
-
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://frontend-dibooking.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Header', '*');
+  res.header('Access-Control-Allow-Methods', '*');
   next();
 });
 app.use(cookieParser());
