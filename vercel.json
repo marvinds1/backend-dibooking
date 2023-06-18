@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "name": "dibooking-app",
+    "builds": [
+       { "src": "scripts/server.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+       { "src": "/(.*)", "dest": "scripts/server.js" }
+    ]
+ }
