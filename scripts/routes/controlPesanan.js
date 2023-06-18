@@ -81,6 +81,20 @@ router.put('/confirmation/:id', async (req, res) => {
   }
 });
 
+router.put('/cancel/:id', async (req, res) => {
+  const pesanan = await Pesanan.findOne({ idPesanan: req.params.id });
+  const penyewa = await User.findOne({ id: pesanan.idUser });
+  penyewa.saldo += pesanan.totalPrice;
+  pesanan.status = 'Dibatalkan';
+  try {
+    await pesanan.save();
+    await penyewa.save();
+    res.json({ message: 'Pesanan updated' });
+  } catch (e) {
+    res.json({ message: e });
+  }
+});
+
 router.get('/pesanans', async (req, res) => {
   const refreshToken = req.headers.authorization;
   const user = await User.findOne({ refreshToken });

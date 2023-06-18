@@ -10,6 +10,7 @@ const authRoute = require('./routes/auth');
 const profile = require('./routes/controlUser');
 const lapangan = require('./routes/controlLapangan');
 const pesanan = require('./routes/controlPesanan');
+const review = require('./routes/controlReview');
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/api/user', authRoute);
 app.use('/api/detail', profile);
 app.use('/api/lapangan', lapangan);
 app.use('/api/pemesanan', pesanan);
+app.use('/api/review', review);
 
 exports.app = app;
 

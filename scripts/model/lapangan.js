@@ -27,7 +27,7 @@ const lapanganSchema = new Schema({
     type: String, Required: true, min: 5, max: 255,
   },
   facilities: {
-    type: Number, Required: true, min: 5, max: 255,
+    type: Number, Required: true, min: 5, max: 50000,
   },
   rented: {
     type: Number, Required: true, default: 0,
