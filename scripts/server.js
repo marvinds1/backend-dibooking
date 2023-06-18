@@ -27,7 +27,7 @@ db.mongoose.connect(db.url, dbConfig)
   });
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://frontend-dibooking.vercel.app');
   res.header('Access-Control-Allow-Header', '*');
   res.header('Access-Control-Allow-Methods', '*');
   next();
