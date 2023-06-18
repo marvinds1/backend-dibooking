@@ -4,7 +4,6 @@ const { Schema } = mongoose;
 
 const reviewSchema = new Schema({
   id: { type: Number, Required: true },
-  idUser: { type: Number, Required: true },
   nameUser: { type: String, Required: true },
   idField: { type: Number, Required: true },
   desc: {

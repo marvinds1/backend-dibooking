@@ -81,6 +81,24 @@ router.put('/confirmation/:id', async (req, res) => {
   }
 });
 
+router.put('/terima/:id', async (req, res) => {
+  try {
+    const pesanan = await Pesanan.findOne({ idPesanan: req.params.id });
+    pesanan.status = 'Dikonfirmasi';
+
+    const lapangan = await Lapangan.findOne({ idField: pesanan.idField });
+    const manager = await User.findOne({ id: lapangan.idManager });
+
+    manager.saldo += pesanan.totalPrice;
+    await manager.save();
+    await pesanan.save();
+
+    res.json(pesanan);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to process request' });
+  }
+});
+
 router.put('/cancel/:id', async (req, res) => {
   const pesanan = await Pesanan.findOne({ idPesanan: req.params.id });
   const penyewa = await User.findOne({ id: pesanan.idUser });
@@ -104,6 +122,7 @@ router.get('/pesanans', async (req, res) => {
     const lapangan1 = await Lapangan.findOne({ idField: pesanan[i].idField });
     const manager = await User.findOne({ id: lapangan1.idManager });
     data.push({
+      idField: pesanan[i].idField,
       idPesanan: pesanan[i].idPesanan,
       title: lapangan1.title,
       price: lapangan1.price,
@@ -129,6 +148,37 @@ router.delete('/delete/:id', async (req, res) => {
     res.json({ message: 'Pesanan deleted' });
   } catch (e) {
     res.json({ message: e });
+  }
+});
+
+router.get('/rekap/:id', async (req, res) => {
+  try {
+    const lapangan = await Lapangan.find({ idManager: req.params.id });
+    const lapanganIds = lapangan.map((lap) => lap.idField);
+
+    const pesananPromises = Pesanan.find({ idField: { $in: lapanganIds } });
+    const [pesananResults] = await Promise.all([pesananPromises]);
+
+    const userIds = pesananResults.map((result) => result.idUser);
+    const userPromises = User.find({ id: { $in: userIds } });
+    const [userResults] = await Promise.all([userPromises]);
+
+    const lapanganMap = new Map();
+    lapangan.forEach((lap) => lapanganMap.set(lap.idField, lap.title));
+
+    const response = pesananResults.map((result) => ({
+      idPesanan: result.idPesanan,
+      nama: userResults.find((user) => user.id === result.idUser).name,
+      title: lapanganMap.get(result.idField),
+      tanggal: result.tanggal,
+      jam: result.jam,
+      status: result.status,
+    }));
+    const tes = response.filter((resp) => resp.status === 'Menunggu Konfirmasi');
+
+    res.json(tes);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch data' });
   }
 });
 

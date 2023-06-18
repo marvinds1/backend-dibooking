@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const router = require('express').Router();
 const Review = require('../model/review');
-const User = require('../model/user');
 
 router.post('/add', async (req, res) => {
   let Id = Math.floor(Math.random() * 1000000000);
@@ -10,11 +9,9 @@ router.post('/add', async (req, res) => {
     Id = Math.floor(Math.random() * 1000000000);
     alreadyExists = await Review.findOne({ id: Id });
   }
-  const user = await User.findOne({ id: req.body.idUser });
   const newReview = new Review({
     id: Id,
-    idUser: req.body.idUser,
-    nameUser: user.name,
+    nameUser: req.body.nameUser,
     idField: req.body.idField,
     desc: req.body.desc,
     rating: req.body.rating,
