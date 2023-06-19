@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const router = require('express').Router();
+const cors = require('cors');
 const Pesanan = require('../model/pesanan');
 const Lapangan = require('../model/lapangan');
 const User = require('../model/user');
@@ -113,7 +114,7 @@ router.put('/cancel/:id', async (req, res) => {
   }
 });
 
-router.get('/pesanans', async (req, res) => {
+router.get('/pesanans', cors(), async (req, res) => {
   const refreshToken = req.headers.authorization;
   const user = await User.findOne({ refreshToken });
   const pesanan = await Pesanan.find({ idUser: user.id });
