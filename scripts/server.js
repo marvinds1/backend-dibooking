@@ -13,6 +13,8 @@ const pesanan = require('./routes/controlPesanan');
 const review = require('./routes/controlReview');
 const cookieParser = require('cookie-parser');
 
+const serverTimeout = 60000;
+
 dotenv.config();
 const dbConfig = {
   useNewUrlParser: true,
@@ -26,9 +28,11 @@ db.mongoose.connect(db.url, dbConfig)
     console.log('Cannot connect to the database!', err); process.exit();
   });
 
+app.timeout = serverTimeout;
+
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Header', '*');
+  res.header('Access-Control-Allow-Headers', '*');
   res.header('Access-Control-Allow-Methods', '*');
   next();
 });

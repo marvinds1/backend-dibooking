@@ -1,9 +1,12 @@
+/* eslint-disable max-len */
 /* eslint-disable no-await-in-loop */
 const router = require('express').Router();
 const cors = require('cors');
 const Pesanan = require('../model/pesanan');
 const Lapangan = require('../model/lapangan');
 const User = require('../model/user');
+
+const serverTimeout = 60000;
 
 router.get('/', async (req, res) => {
   const pesanan = await Pesanan.find();
@@ -115,30 +118,33 @@ router.put('/cancel/:id', async (req, res) => {
 });
 
 router.get('/pesanans', cors(), async (req, res) => {
-  const refreshToken = req.headers.authorization;
-  const user = await User.findOne({ refreshToken });
-  const pesanan = await Pesanan.find({ idUser: user.id });
-  const data = [];
-  for (let i = 0; i < pesanan.length; i += 1) {
-    const lapangan1 = await Lapangan.findOne({ idField: pesanan[i].idField });
-    const manager = await User.findOne({ id: lapangan1.idManager });
-    data.push({
-      idField: pesanan[i].idField,
-      idPesanan: pesanan[i].idPesanan,
-      title: lapangan1.title,
-      price: lapangan1.price,
-      total: pesanan[i].totalPrice,
-      manager: manager.name,
-      nomor_ponsel: manager.nomor_ponsel,
-      tanggal: pesanan[i].tanggal,
-      jam: pesanan[i].jam,
-      status: pesanan[i].status,
-    });
-  }
   try {
+    const options = { timeout: serverTimeout };
+    const refreshToken = req.headers.authorization;
+    const user = await User.findOne({ refreshToken }, null, options).lean();
+    const pesanan = await Pesanan.find({ idUser: user.id }, null, options).lean();
+    const pesananPromises = pesanan.map(async (pesananItem) => {
+      const lapangan1 = await Lapangan.findOne({ idField: pesananItem.idField }, null, options).lean();
+      const manager = await User.findOne({ id: lapangan1.idManager }, null, options).lean();
+      return {
+        idField: pesananItem.idField,
+        idPesanan: pesananItem.idPesanan,
+        title: lapangan1.title,
+        price: lapangan1.price,
+        total: pesananItem.totalPrice,
+        manager: manager.name,
+        nomor_ponsel: manager.nomor_ponsel,
+        tanggal: pesananItem.tanggal,
+        jam: pesananItem.jam,
+        status: pesananItem.status,
+      };
+    });
+
+    const data = await Promise.all(pesananPromises);
+
     res.json(data);
-  } catch (e) {
-    res.json({ message: e });
+  } catch (error) {
+    res.json({ message: error.message });
   }
 });
 
