@@ -42,6 +42,23 @@ router.get('/rekap', async (req, res) => {
   }
 });
 
+router.get('/detail/:id', async (req, res) => {
+  const lapangan = await Lapangan.findOne({ idField: req.params.id });
+  const response = {
+    id: req.params.id,
+    name: lapangan.title,
+    kategori: lapangan.typeField,
+    lokasi: lapangan.location,
+    harga: lapangan.price,
+    deskripsi: lapangan.description,
+  };
+  try {
+    res.json(response);
+  } catch (e) {
+    res.json({ message: e });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   const lapangan = await Lapangan.findOne({ idField: req.params.id });
   const reviews = await Review.find({ idField: req.params.id });
@@ -110,7 +127,7 @@ router.post('/add', async (req, res) => {
     facilities: req.body.facilities,
     address: req.body.address,
     price: req.body.price,
-    rating: 4.5,
+    rating: 0,
     openTime: req.body.openTime,
     closeTime: req.body.closeTime,
   });
@@ -119,6 +136,21 @@ router.post('/add', async (req, res) => {
     res.json({ message: 'Lapangan added' });
   } catch (e) {
     res.status(400).send(e);
+  }
+});
+
+router.put('/update/:id', async (req, res) => {
+  const lapangan = await Lapangan.findOne({ idField: req.params.id });
+  lapangan.title = req.body.nama;
+  lapangan.typeField = req.body.kategori;
+  lapangan.location = req.body.lokasi;
+  lapangan.price = req.body.harga;
+  lapangan.description = req.body.deskripsi;
+  try {
+    await lapangan.save();
+    res.json({ message: 'Lapangan updated' });
+  } catch (e) {
+    res.json({ message: e });
   }
 });
 
