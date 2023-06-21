@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 /* eslint-disable import/order */
 const express = require('express');
@@ -11,7 +12,9 @@ const profile = require('./routes/controlUser');
 const lapangan = require('./routes/controlLapangan');
 const pesanan = require('./routes/controlPesanan');
 const review = require('./routes/controlReview');
+const updateStatus = require('./utils/updateStatus');
 const cookieParser = require('cookie-parser');
+const cron = require('node-cron');
 
 const serverTimeout = 60000;
 
@@ -45,7 +48,12 @@ app.use('/api/lapangan', lapangan);
 app.use('/api/pemesanan', pesanan);
 app.use('/api/review', review);
 
-exports.app = app;
+cron.schedule('*/1 * * * *', () => {
+  updateStatus();
+  console.log('Cron Job for Update Status is running');
+});
 
+exports.app = app;
+console.log('Cron Job for Update Status is running');
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
