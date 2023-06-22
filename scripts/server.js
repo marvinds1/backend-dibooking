@@ -48,7 +48,7 @@ app.use('/api/lapangan', lapangan);
 app.use('/api/pemesanan', pesanan);
 app.use('/api/review', review);
 
-cron.schedule('*/1 * * * *', () => {
+cron.schedule('*/10 * * * *', () => {
   updateStatus();
   console.log('Cron Job for Update Status is running');
 });

@@ -185,7 +185,7 @@ router.get('/rekap/:id', async (req, res) => {
 
     res.json(tes);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch data' });
+    res.status(500).json(error);
   }
 });
 
