@@ -163,11 +163,11 @@ router.get('/rekap/:id', async (req, res) => {
     const lapangan = await Lapangan.find({ idManager: req.params.id });
     const lapanganIds = lapangan.map((lap) => lap.idField);
 
-    const pesananPromises = Pesanan.find({ idField: { $in: lapanganIds } });
+    const pesananPromises = Pesanan.find({ idField: lapanganIds });
     const [pesananResults] = await Promise.all([pesananPromises]);
 
     const userIds = pesananResults.map((result) => result.idUser);
-    const userPromises = User.find({ id: { $in: userIds } });
+    const userPromises = User.find({ id: userIds });
     const [userResults] = await Promise.all([userPromises]);
 
     const lapanganMap = new Map();
