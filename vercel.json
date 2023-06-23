@@ -6,5 +6,10 @@
     ],
     "routes": [
        { "src": "/(.*)", "dest": "scripts/server.js" }
+    ],
+    "cron": [
+      {
+         "path": "scripts/server.js"
+      }
     ]
  }
