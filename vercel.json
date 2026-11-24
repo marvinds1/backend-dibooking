@@ -1,15 +1,6 @@
 {
-    "version": 2,
-    "name": "dibooking-app",
-    "builds": [
-       { "src": "scripts/server.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-       { "src": "/(.*)", "dest": "scripts/server.js" }
-    ],
-    "cron": [
-      {
-         "path": "scripts/server.js"
-      }
-    ]
- }
+  "version": 2,
+  "builds": [{ "src": "scripts/server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "scripts/server.js" }],
+  "crons": [{ "path": "/api/internal/cron/update-status", "schedule": "0 * * * *" }]
+}

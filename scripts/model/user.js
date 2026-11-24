@@ -1,28 +1,33 @@
 const mongoose = require('mongoose');
 const locations = require('../data/lokasi');
 
-const { Schema } = mongoose;
-
-const userSchema = new Schema({
-  id: { type: Number, Required: true },
+const userSchema = new mongoose.Schema({
+  id: {
+    type: Number, required: true, unique: true, index: true,
+  },
   name: {
-    type: String, Required: true, min: 5, max: 255,
+    type: String, required: true, minlength: 3, maxlength: 100,
   },
-  nomor_ponsel: {
-    type: String, Required: true, min: 5, max: 255,
+  nomor_ponsel: { type: String, required: true, maxlength: 20 },
+  email: {
+    type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 255,
   },
-  email: { type: String, Required: true, max: 255 },
   status: {
-    type: String, Required: true, enum: ['Penyewa', 'Pemilik Lapangan'], default: 'Penyewa',
+    type: String, required: true, enum: ['Penyewa', 'Pemilik Lapangan'], default: 'Penyewa',
   },
-  password: {
-    type: String, Required: true, min: 6, max: 500,
-  },
-  saldo: { type: Number, default: 100000 },
+  password: { type: String, required: true, select: false },
+  saldo: { type: Number, default: 100000, min: 0 },
   lokasi: { type: String, enum: locations, default: 'Kota Semarang' },
-  updatedAt: { type: Date, default: Date.now },
-  createdAt: { type: Date, default: Date.now },
-  refreshToken: [{ type: String, default: null }],
+  refreshTokens: { type: [String], default: [], select: false },
+}, { timestamps: true });
+
+userSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    const {
+      password, refreshTokens, __v, ...safe
+    } = ret;
+    return safe;
+  },
 });
 
 module.exports = mongoose.model('user', userSchema);

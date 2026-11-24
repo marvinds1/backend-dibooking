@@ -1,157 +1,130 @@
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-await-in-loop */
 const router = require('express').Router();
 const Lapangan = require('../model/lapangan');
 const User = require('../model/user');
 const Review = require('../model/review');
+const asyncHandler = require('../middleware/asyncHandler');
+const validate = require('../middleware/validate');
+const { requireAuth, requireRole } = require('../middleware/auth');
+const schemas = require('../utils/validation');
+const { insertWithUniqueId } = require('../utils/ids');
+const HttpError = require('../utils/httpError');
 
-router.get('/detailManager', async (req, res) => {
-  const idManager = req.body.idManager;
-  const manager = await User.findOne({ id: idManager });
-  try {
-    res.json(manager);
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+const PUBLIC_MANAGER_FIELDS = 'id name nomor_ponsel lokasi -_id';
+const MAX_LIST = 200;
 
-router.get('/', async (req, res) => {
-  const lapangan = await Lapangan.find();
-  try {
-    res.json(lapangan);
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+const findFieldOr404 = async (idField) => {
+  const lapangan = await Lapangan.findOne({ idField }).lean();
+  if (!lapangan) throw new HttpError(404, 'Lapangan not found');
+  return lapangan;
+};
 
-router.get('/rekap', async (req, res) => {
-  const token = req.headers.authorization;
-  const manager = await User.findOne({ refreshToken: token });
-  try {
-    const lapangan = await Lapangan.find({ idManager: manager.id });
-    const rekap = lapangan.map((lap) => ({
-      id: lap.idField,
-      name: lap.title,
-      kategori: lap.typeField,
-      location: lap.location,
-      price: lap.price,
-    }));
-    res.json(rekap);
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || MAX_LIST, 1), MAX_LIST);
+  const filter = {};
+  if (req.query.location) filter.location = String(req.query.location);
+  if (req.query.type) filter.typeField = String(req.query.type);
+  const lapangan = await Lapangan.find(filter).sort({ createdAt: -1 }).limit(limit).lean();
+  res.json(lapangan);
+}));
 
-router.get('/detail/:id', async (req, res) => {
-  const lapangan = await Lapangan.findOne({ idField: req.params.id });
-  const response = {
-    id: req.params.id,
+router.get('/detailManager', asyncHandler(async (req, res) => {
+  const idManager = Number(req.query.idManager ?? (req.body && req.body.idManager));
+  if (!Number.isInteger(idManager)) throw new HttpError(400, 'idManager is required');
+  const manager = await User.findOne({ id: idManager }).select(PUBLIC_MANAGER_FIELDS).lean();
+  if (!manager) throw new HttpError(404, 'Manager not found');
+  res.json(manager);
+}));
+
+router.get('/rekap', requireAuth, requireRole('Pemilik Lapangan'), asyncHandler(async (req, res) => {
+  const lapangan = await Lapangan.find({ idManager: req.user.id }).lean();
+  res.json(lapangan.map((lap) => ({
+    id: lap.idField,
+    name: lap.title,
+    kategori: lap.typeField,
+    location: lap.location,
+    price: lap.price,
+  })));
+}));
+
+router.get('/detail/:id', asyncHandler(async (req, res) => {
+  const lapangan = await findFieldOr404(Number(req.params.id));
+  res.json({
+    id: lapangan.idField,
     name: lapangan.title,
     kategori: lapangan.typeField,
     lokasi: lapangan.location,
     harga: lapangan.price,
     deskripsi: lapangan.description,
-  };
-  try {
-    res.json(response);
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  const lapangan = await Lapangan.findOne({ idField: req.params.id });
-  const reviews = await Review.find({ idField: req.params.id });
-  const comment = reviews.map((review) => ({
-    id: review.id,
-    name: review.nameUser,
-    date: new Date(review.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true,
-    }),
-    star: review.rating,
-    comment: review.desc,
-  }));
-  const rating5 = reviews.filter((review) => review.rating === 5).length;
-  const rating4 = reviews.filter((review) => review.rating === 4).length;
-  const rating3 = reviews.filter((review) => review.rating === 3).length;
-  const rating2 = reviews.filter((review) => review.rating === 2).length;
-  const rating1 = reviews.filter((review) => review.rating === 1).length;
-  const rating0 = reviews.filter((review) => review.rating === 0).length;
-  const review = {
-    rating: {
-      rating5,
-      rating4,
-      rating3,
-      rating2,
-      rating1,
-      rating0,
-    },
-    comment,
-  };
-  const manager = await User.findOne({ id: lapangan.idManager });
-
-  const response = {
-    lapangan,
-    manager,
-    review,
-  };
-  try {
-    res.json({ response });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-router.post('/add', async (req, res) => {
-  let Id = Math.floor(Math.random() * 1000000000);
-  let alreadyExists = await Lapangan.findOne({ id: Id });
-  while (alreadyExists) {
-    Id = Math.floor(Math.random() * 1000000000);
-    alreadyExists = await Lapangan.findOne({ id: Id });
-  }
-  const token = req.body.token;
-  const manager = await User.findOne({ refreshToken: token });
-  const newLapangan = new Lapangan({
-    title: req.body.title,
-    idField: Id,
-    idManager: manager.id,
-    typeField: req.body.typeField,
-    imageSrc: req.body.imageSrc,
-    location: req.body.location,
-    description: req.body.description,
-    facilities: req.body.facilities,
-    address: req.body.address,
-    price: req.body.price,
-    rating: 0,
-    openTime: req.body.openTime,
-    closeTime: req.body.closeTime,
   });
-  try {
-    await newLapangan.save();
-    res.json({ message: 'Lapangan added' });
-  } catch (e) {
-    res.status(400).send(e);
-  }
-});
+}));
 
-router.put('/update/:id', async (req, res) => {
-  const lapangan = await Lapangan.findOne({ idField: req.params.id });
-  lapangan.title = req.body.nama;
-  lapangan.typeField = req.body.kategori;
-  lapangan.location = req.body.lokasi;
-  lapangan.price = req.body.harga;
-  lapangan.description = req.body.deskripsi;
-  try {
-    await lapangan.save();
+router.get('/:id', asyncHandler(async (req, res) => {
+  const idField = Number(req.params.id);
+  const lapangan = await findFieldOr404(idField);
+  const [reviews, manager] = await Promise.all([
+    Review.find({ idField }).sort({ createdAt: -1 }).limit(500).lean(),
+    User.findOne({ id: lapangan.idManager }).select(PUBLIC_MANAGER_FIELDS).lean(),
+  ]);
+
+  const counts = [0, 0, 0, 0, 0, 0];
+  const comment = reviews.map((r) => {
+    if (counts[r.rating] !== undefined) counts[r.rating] += 1;
+    return {
+      id: r.id,
+      name: r.nameUser,
+      date: new Date(r.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true,
+      }),
+      star: r.rating,
+      comment: r.desc,
+    };
+  });
+  const rating = {
+    rating5: counts[5],
+    rating4: counts[4],
+    rating3: counts[3],
+    rating2: counts[2],
+    rating1: counts[1],
+    rating0: counts[0],
+  };
+  res.json({ response: { lapangan, manager, review: { rating, comment } } });
+}));
+
+router.post(
+  '/add',
+  requireAuth,
+  requireRole('Pemilik Lapangan'),
+  validate(schemas.createField),
+  asyncHandler(async (req, res) => {
+    const { token, ...data } = req.body;
+    if (data.openTime >= data.closeTime) throw new HttpError(400, 'openTime must be before closeTime');
+    const lapangan = await insertWithUniqueId(Lapangan, () => ({
+      ...data,
+      idManager: req.user.id,
+      rating: 0,
+    }), 'idField');
+    res.status(201).json({ message: 'Lapangan added', idField: lapangan.idField });
+  }),
+);
+
+router.put(
+  '/update/:id',
+  requireAuth,
+  requireRole('Pemilik Lapangan'),
+  validate(schemas.updateField),
+  asyncHandler(async (req, res) => {
+    const map = {
+      nama: 'title', kategori: 'typeField', lokasi: 'location', harga: 'price', deskripsi: 'description',
+    };
+    const update = Object.fromEntries(Object.entries(req.body).map(([k, v]) => [map[k], v]));
+    const result = await Lapangan.updateOne(
+      { idField: Number(req.params.id), idManager: req.user.id },
+      { $set: update },
+      { runValidators: true },
+    );
+    if (result.matchedCount === 0) throw new HttpError(404, 'Lapangan not found');
     res.json({ message: 'Lapangan updated' });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+  }),
+);
 
 module.exports = router;

@@ -1,35 +1,35 @@
 {
-  "name": "node-mongodb-api",
+  "name": "backend-dibooking",
   "version": "1.0.0",
-  "description": "",
+  "description": "REST API for booking sports fields (Express + MongoDB)",
   "main": "scripts/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node scripts/server.js",
-    "dev": "nodemon server.js"
+    "dev": "node --watch scripts/server.js",
+    "lint": "eslint scripts test",
+    "test": "node --test test/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hapi/joi": "^16.1.8",
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "express-joi-validation": "^4.0.3",
-    "http-proxy-middleware": "^2.0.6",
-    "joi": "^14.3.1",
-    "jsonwebtoken": "^8.5.1",
-    "moment": "^2.29.4",
-    "mongoose": "^5.8.6",
-    "node-cron": "^3.0.2"
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "joi": "^18.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.13.0",
+    "node-cron": "^4.6.0"
   },
   "devDependencies": {
-    "eslint": "^8.42.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "nodemon": "^2.0.2"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
